@@ -41,27 +41,33 @@ struct DayEntry: TimelineEntry {
 
 struct MonthlyWidgetEntryView : View {
     var entry: DayEntry
+    var config: MonthConfig
+    
+    init(entry: DayEntry) {
+        self.entry = entry
+        self.config = MonthConfig.determineConfig(from: entry.date)
+    }
 
     var body: some View {
         ZStack {
             ContainerRelativeShape()
-                .fill(.gray.gradient)
+                .fill(config.backgroundColor.gradient)
             
             VStack {
                 HStack(spacing: 4) {
-                    Text("⛄️")
+                    Text(config.emojiText)
                         .font(.title)
                     Text(entry.date.weekdayDisplayFormat)
                         .font(.title3)
                         .bold()
                         .minimumScaleFactor(0.6)
-                        .foregroundStyle(.black.opacity(0.6))
+                        .foregroundStyle(config.weekdayTextColor)
                     Spacer()
                 }
                 
                 Text(entry.date.dayDisplayFormat)
                     .font(.system(size: 80, weight: .heavy))
-                    .foregroundStyle(.white.opacity(0.8))
+                    .foregroundStyle(config.dayTextColor)
             }
             .padding()
         }
@@ -93,7 +99,24 @@ struct MonthlyWidget: Widget {
     MonthlyWidget()
 } timeline: {
     DayEntry(date: .now)
-    DayEntry(date: .now)
+    DayEntry(date: dateToDisplay(month: 1, day: 22))
+    DayEntry(date: dateToDisplay(month: 2, day: 22))
+    DayEntry(date: dateToDisplay(month: 3, day: 22))
+    DayEntry(date: dateToDisplay(month: 4, day: 22))
+    DayEntry(date: dateToDisplay(month: 5, day: 22))
+    DayEntry(date: dateToDisplay(month: 6, day: 22))
+    DayEntry(date: dateToDisplay(month: 7, day: 22))
+    DayEntry(date: dateToDisplay(month: 8, day: 22))
+    DayEntry(date: dateToDisplay(month: 9, day: 22))
+    DayEntry(date: dateToDisplay(month: 10, day: 22))
+    DayEntry(date: dateToDisplay(month: 11, day: 22))
+    DayEntry(date: dateToDisplay(month: 12, day: 22))
+}
+
+// TODO: Move inside the new `#Preview` somehow?
+private func dateToDisplay(month: Int, day: Int) -> Date {
+    let components = DateComponents(calendar: .current, year: 2024, month: month, day: day)
+    return Calendar.current.date(from: components)!
 }
 
 extension Date {
