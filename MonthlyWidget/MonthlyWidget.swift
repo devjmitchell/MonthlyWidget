@@ -5,23 +5,23 @@
 //  Created by Jason Mitchell on 3/28/24.
 //
 
-import WidgetKit
+import AppIntents
 import SwiftUI
+import WidgetKit
 
-struct Provider: IntentTimelineProvider {
+struct Provider: AppIntentTimelineProvider {
     func placeholder(in context: Context) -> DayEntry {
         DayEntry(date: Date(), showFunFont: false)
     }
     
-    func getSnapshot(for configuration: ChangeFontIntent, in context: Context, completion: @escaping (DayEntry) -> Void) {
-        let entry = DayEntry(date: Date(), showFunFont: false)
-        completion(entry)
+    func snapshot(for configuration: ChangeFontIntent, in context: Context) async -> DayEntry {
+        DayEntry(date: Date(), showFunFont: false)
     }
     
-    func getTimeline(for configuration: ChangeFontIntent, in context: Context, completion: @escaping (Timeline<DayEntry>) -> Void) {
+    func timeline(for configuration: ChangeFontIntent, in context: Context) async -> Timeline<DayEntry> {
         var entries: [DayEntry] = []
         
-        let showFunFont = configuration.funFont == 1
+        let showFunFont = configuration.funFont
         
         // Generate a timeline consisting of seven entries a day apart, starting from the current date.
         let currentDate = Date()
@@ -32,8 +32,7 @@ struct Provider: IntentTimelineProvider {
             entries.append(entry)
         }
         
-        let timeline = Timeline(entries: entries, policy: .atEnd)
-        completion(timeline)
+        return Timeline(entries: entries, policy: .atEnd)
     }
 }
 
@@ -86,7 +85,7 @@ struct MonthlyWidget: Widget {
     let kind: String = "MonthlyWidget"
     
     var body: some WidgetConfiguration {
-        IntentConfiguration(kind: kind, intent: ChangeFontIntent.self, provider: Provider()) { entry in
+        AppIntentConfiguration(kind: kind, intent: ChangeFontIntent.self, provider: Provider()) { entry in
             MonthlyWidgetEntryView(entry: entry)
         }
         .configurationDisplayName("Monthly Style Widget")
@@ -104,6 +103,13 @@ struct MonthlyWidget: Widget {
     MockData.dayFour
 }
 
+struct ChangeFontIntent: AppIntent, WidgetConfigurationIntent {
+    static var title: LocalizedStringResource = "Fun Font"
+    static var description: IntentDescription = .init(stringLiteral: "Switch to a fun font")
+    
+    @Parameter(title: "Fun Font")
+    var funFont: Bool
+}
 
 extension Date {
     var weekdayDisplayFormat: String {
